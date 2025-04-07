@@ -6,3 +6,13 @@ async function bootstrap() {
     await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();
+
+import mongoose from 'mongoose';
+
+mongoose.connection.on('connected', () => {
+    console.log('✅ Conectado ao MongoDB com sucesso!');
+});
+
+mongoose.connection.on('error', (err) => {
+    console.error('❌ Erro na conexão com o MongoDB:', err);
+});

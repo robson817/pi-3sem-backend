@@ -4,13 +4,23 @@ import { AppService } from './app.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UsersModule } from './users/users.module';
 import { RecipesModule } from './recipes/recipes.module';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
     imports: [
-        MongooseModule.forRoot('mongodb://localhost/nome-do-banco'),
+        ConfigModule.forRoot({
+            isGlobal: true,
+        }),
+        MongooseModule.forRootAsync({
+            imports: [ConfigModule],
+            inject: [ConfigService],
+            useFactory: (configService: ConfigService) => ({
+                uri: configService.getOrThrow<string>('MONGO_URI'),
+            }),
+        }),
         UsersModule,
         RecipesModule,
-    ], //colocar a string de conexão
+    ],
     controllers: [AppController],
     providers: [AppService],
 })
