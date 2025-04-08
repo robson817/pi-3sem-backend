@@ -39,7 +39,7 @@ export class User {
         ],
         default: [],
     })
-    commentedRecipes!: {
+    reviewRecipes!: {
         recipeId: string;
         date: Date;
         comment: string;
