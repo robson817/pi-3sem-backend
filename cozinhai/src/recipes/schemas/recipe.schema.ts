@@ -8,6 +8,7 @@ export class Recipe {
     @Prop({
         type: [
             {
+                userId: String,
                 date: Date,
                 comment: String,
                 grade: Number,
@@ -16,8 +17,9 @@ export class Recipe {
         default: [],
     })
     reviews!: {
+        userId: string;
         date: Date;
-        comment: string;
+        comment?: string;
         grade: number;
     }[];
 }

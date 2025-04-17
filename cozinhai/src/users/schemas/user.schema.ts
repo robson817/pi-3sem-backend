@@ -32,6 +32,7 @@ export class User {
         type: [
             {
                 recipeId: String,
+                title: String,
                 date: Date,
                 comment: String,
                 grade: Number,
@@ -41,8 +42,9 @@ export class User {
     })
     reviewRecipes!: {
         recipeId: string;
+        title: string;
         date: Date;
-        comment: string;
+        comment?: string;
         grade: number;
     }[];
 
