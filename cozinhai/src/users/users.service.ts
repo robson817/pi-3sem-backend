@@ -4,8 +4,8 @@ import {
     NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { User, UserDocument } from './schemas/user.schema';
-import { Recipe, RecipeDocument } from 'src/recipes/schemas/recipe.schema';
+import { User, UserDocument } from './user.schema';
+import { Recipe, RecipeDocument } from 'src/recipes/recipe.schema';
 import { Model } from 'mongoose';
 import { CreateUserDto } from './dto/create/create-user.dto';
 import * as bcrypt from 'bcrypt';
@@ -33,10 +33,11 @@ export class UserService {
         if (existingEmail) {
             throw new BadRequestException('Email já está em uso');
         }
+        const salt = createUserDto.email + '$';
         // Cria a variável password e a userData será todo o Dto, menos o password
         const { password, ...userData } = createUserDto;
         // Hash da senha
-        const hashedPassword: string = await bcrypt.hash(password, 10);
+        const hashedPassword: string = await bcrypt.hash(salt + password, 10);
 
         //Poderia ser feito assim
         // const name = createUserDto.name;
@@ -81,9 +82,11 @@ export class UserService {
             throw new BadRequestException('Senha atual incorreta');
         }
 
+        const salt = user.email + '$';
+
         // Faz o hash da nova senha antes de salvar
         const hashedPassword = await bcrypt.hash(
-            updatePasswordDto.newPassword,
+            salt + updatePasswordDto.newPassword,
             10,
         );
         user.passwordHash = hashedPassword;
@@ -117,24 +120,53 @@ export class UserService {
         userId: string,
         deleteFavoritesDto: DeleteFavoritesDto,
     ): Promise<User> {
-        const user = await this.userModel.findById(userId);
-        if (!user) {
+        const updatedUser = await this.userModel.findByIdAndUpdate(
+            userId,
+            {
+                $pull: {
+                    favoriteRecipes: { recipeId: deleteFavoritesDto.id },
+                },
+            },
+            { new: true }, // retorna o documento atualizado
+        );
+
+        if (!updatedUser) {
             throw new NotFoundException('Usuário não encontrado');
         }
 
-        const alreadyFavoriteRecipe = user.favoriteRecipes.some(
+        // Verifica se realmente havia esse favorito
+        const stillExists = updatedUser.favoriteRecipes.some(
             (fav) => fav.recipeId === deleteFavoritesDto.id,
         );
-
-        if (!alreadyFavoriteRecipe) {
-            throw new BadRequestException('Receita não está nos favoritos');
+        if (stillExists) {
+            throw new BadRequestException('Falha ao remover favorito');
         }
 
-        user.favoriteRecipes = user.favoriteRecipes.filter(
-            (fav) => fav.recipeId !== deleteFavoritesDto.id,
-        );
-        return user.save();
+        return updatedUser;
     }
+
+    // async removeFavoriteRecipe(
+    //     userId: string,
+    //     deleteFavoritesDto: DeleteFavoritesDto,
+    // ): Promise<User> {
+    //     const user = await this.userModel.findById(userId);
+    //     if (!user) {
+    //         throw new NotFoundException('Usuário não encontrado');
+    //     }
+
+    //     const alreadyFavoriteRecipe = user.favoriteRecipes.some(
+    //         (fav) => fav.recipeId === deleteFavoritesDto.id,
+    //     );
+
+    //     if (!alreadyFavoriteRecipe) {
+    //         throw new BadRequestException('Receita não está nos favoritos');
+    //     }
+
+    //     user.favoriteRecipes = user.favoriteRecipes.filter(
+    //         (fav) => fav.recipeId !== deleteFavoritesDto.id,
+    //     );
+    //     return user.save();
+    // }
 
     async addReview(
         userId: string,
@@ -201,7 +233,7 @@ export class UserService {
         if (!user) {
             throw new NotFoundException('Usuário não encontrado');
         }
-        return user.favoriteRecipes.slice(0, 10);
+        return user.favoriteRecipes.slice(0, 10); //corrigir  futuramente para fazer paginação
     }
 
     async listUserReviews(userId: string): Promise<User['reviewRecipes']> {
@@ -216,7 +248,7 @@ export class UserService {
             (a, b) => b.date.getTime() - a.date.getTime(),
         );
 
-        return orderedReviews.slice(0, 10);
+        return orderedReviews.slice(0, 10); //corrigir  futuramente para fazer paginação
     }
 
     async listRecipeReviews(
@@ -232,7 +264,7 @@ export class UserService {
         return recipe.reviews
             .map((review) => ({
                 date: review.date,
-                comment: review.comment ?? '',
+                comment: review.comment ?? '', // Talvez seria mais performático inicializar o comentário como string vazia e pular esse map
                 grade: review.grade,
             }))
             .slice(0, 10);
