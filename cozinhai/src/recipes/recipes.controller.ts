@@ -1,24 +1,9 @@
-import {
-    Controller,
-    Get,
-    Post,
-    Body,
-    Patch,
-    Param,
-    Delete,
-} from '@nestjs/common';
+import { Controller, Get, Param, Delete } from '@nestjs/common';
 import { RecipesService } from './recipes.service';
-import { CreateRecipeDto } from './dto/create/create-gradeRecipe.dto';
-import { UpdateRecipeDto } from './dto/update-recipe.dto';
 
 @Controller('recipes')
 export class RecipesController {
     constructor(private readonly recipesService: RecipesService) {}
-
-    @Post()
-    create(@Body() createRecipeDto: CreateRecipeDto) {
-        return this.recipesService.create(createRecipeDto);
-    }
 
     @Get()
     findAll() {
@@ -28,11 +13,6 @@ export class RecipesController {
     @Get(':id')
     findOne(@Param('id') id: string) {
         return this.recipesService.findOne(+id);
-    }
-
-    @Patch(':id')
-    update(@Param('id') id: string, @Body() updateRecipeDto: UpdateRecipeDto) {
-        return this.recipesService.update(+id, updateRecipeDto);
     }
 
     @Delete(':id')

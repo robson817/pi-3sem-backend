@@ -11,7 +11,7 @@ export class CreateUserDto {
     @IsString({ message: 'Nome deve ser uma string' })
     @IsNotEmpty({ message: 'Nome não pode ser vazio' })
     @MinLength(3, { message: 'Nome deve conter no mínimo três caracteres' })
-    @MaxLength(20, { message: 'Nome deve conter no máximo vinte caracteres' })
+    @MaxLength(30, { message: 'Nome deve conter no máximo trinta caracteres' })
     name!: string;
 
     @IsString({ message: 'Email deve ser uma string' })

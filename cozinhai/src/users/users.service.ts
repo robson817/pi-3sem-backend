@@ -4,7 +4,7 @@ import {
     NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { User, UserDocument } from './user.schema';
+import { User, UserDocument } from './users.schema';
 import { Recipe, RecipeDocument } from 'src/recipes/recipe.schema';
 import { Model } from 'mongoose';
 import { CreateUserDto } from './dto/create/create-user.dto';
@@ -17,9 +17,9 @@ import { CreateReviewDto } from './dto/create/create-review.dto';
 import { UpdateReviewDto } from './dto/update/update-review.dto';
 
 @Injectable()
-export class UserService {
+export class UsersService {
     constructor(
-        @InjectModel(User.name, Recipe.name)
+        @InjectModel(User.name)
         private userModel: Model<UserDocument>, // Pode ser usado 'User' no lugar do User.name
         @InjectModel(Recipe.name)
         private recipeModel: Model<RecipeDocument>,
