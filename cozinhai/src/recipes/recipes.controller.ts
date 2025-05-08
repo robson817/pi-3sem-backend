@@ -1,22 +1,26 @@
-import { Controller, Get, Param, Delete } from '@nestjs/common';
+import {
+    Controller,
+    DefaultValuePipe,
+    Get,
+    Param,
+    ParseIntPipe,
+    Query,
+} from '@nestjs/common';
 import { RecipesService } from './recipes.service';
 
 @Controller('recipes')
 export class RecipesController {
     constructor(private readonly recipesService: RecipesService) {}
-
-    @Get()
-    findAll() {
-        return this.recipesService.findAll();
-    }
-
-    @Get(':id')
-    findOne(@Param('id') id: string) {
-        return this.recipesService.findOne(+id);
-    }
-
-    @Delete(':id')
-    remove(@Param('id') id: string) {
-        return this.recipesService.remove(+id);
+    @Get('/:recipeId/reviews')
+    async listRecipeReviews(
+        @Param('recipeId') recipeId: string,
+        @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+        @Query('offset', new DefaultValuePipe(0), ParseIntPipe) offset: number,
+    ): Promise<{ date: Date; comment: string; grade: number }[]> {
+        return await this.recipesService.listRecipeReviews(
+            recipeId,
+            limit,
+            offset,
+        );
     }
 }

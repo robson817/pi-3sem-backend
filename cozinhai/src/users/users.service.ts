@@ -176,7 +176,12 @@ export class UsersService {
             throw new NotFoundException('Usuário não encontrado');
         }
 
-        let recipe = await this.recipeModel.findById({ recipeId });
+        // Validação do ID da receita
+        if (!recipeId.trim()) {
+            throw new BadRequestException('ID da receita inválido');
+        }
+
+        let recipe = await this.recipeModel.findOne({ recipeId });
 
         if (!recipe) {
             recipe = new this.recipeModel({
@@ -217,7 +222,7 @@ export class UsersService {
         // Atualiza ou adiciona review no usuário
         if (existingReview) {
             user.reviewRecipes = user.reviewRecipes.map((review) =>
-                review.recipeId === reviewData.recipeId ? reviewData : review,
+                review.recipeId === recipeId ? reviewData : review,
             );
         } else {
             user.reviewRecipes.push(reviewData);
@@ -233,6 +238,7 @@ export class UsersService {
         } else {
             recipe.reviews.push(reviewData);
         }
+
         await user.save();
         await recipe.save();
 
@@ -268,24 +274,5 @@ export class UsersService {
         );
 
         return orderedReviews.slice(offset, offset + limit);
-    }
-
-    async listRecipeReviews(
-        recipeId: string,
-        limit: number,
-        offset: number,
-    ): Promise<{ date: Date; comment: string; grade: number }[]> {
-        const recipe = await this.recipeModel.findById(recipeId);
-
-        if (!recipe) {
-            throw new NotFoundException('Receita não encontrada');
-        }
-
-        // Retorna apenas os reviews com as propriedades solicitadas
-        return recipe.reviews.slice(offset, offset + limit).map((review) => ({
-            date: review.date,
-            comment: review.comment ?? '',
-            grade: review.grade,
-        }));
     }
 }

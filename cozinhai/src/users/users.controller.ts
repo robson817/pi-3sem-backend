@@ -93,17 +93,4 @@ export class UsersController {
     ): Promise<{ recipeId: string; title: string }[]> {
         return await this.UsersService.listUserReviews(id, limit, offset);
     }
-
-    @Get('/:recipeId/reviews')
-    async listRecipeReviews(
-        @Param('recipeId') recipeId: string,
-        @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
-        @Query('offset', new DefaultValuePipe(0), ParseIntPipe) offset: number,
-    ): Promise<{ date: Date; comment: string; grade: number }[]> {
-        return await this.UsersService.listRecipeReviews(
-            recipeId,
-            limit,
-            offset,
-        );
-    }
 }

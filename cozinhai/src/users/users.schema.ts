@@ -3,12 +3,19 @@ import { HydratedDocument } from 'mongoose';
 
 export type UserDocument = HydratedDocument<User>;
 
-@Schema()
+@Schema({ timestamps: true })
 export class User {
     @Prop({ required: true })
     name!: string;
 
-    @Prop({ required: true, unique: true })
+    @Prop({
+        required: true,
+        unique: true,
+        match: [
+            /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/,
+            'Email inválido',
+        ],
+    })
     email!: string;
 
     @Prop({ required: true })
@@ -35,7 +42,11 @@ export class User {
                 title: String,
                 date: Date,
                 comment: String,
-                grade: Number,
+                grade: {
+                    type: Number,
+                    min: 1,
+                    max: 5,
+                },
             },
         ],
         default: [],
