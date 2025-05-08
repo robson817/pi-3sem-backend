@@ -12,9 +12,7 @@ import * as bcrypt from 'bcrypt';
 import { UpdateNameDto } from './dto/update/update-name.dto';
 import { UpdatePasswordDto } from './dto/update/update-password.dto';
 import { CreateFavoritesDto } from './dto/create/create-favorites.dto';
-import { DeleteFavoritesDto } from './dto/delete/delete-favorites.dto';
 import { CreateReviewDto } from './dto/create/create-review.dto';
-import { UpdateReviewDto } from './dto/update/update-review.dto';
 
 @Injectable()
 export class UsersService {
@@ -73,16 +71,16 @@ export class UsersService {
         const user = await this.userModel.findById(userId);
         if (!user) throw new NotFoundException('Usuário não encontrado');
 
+        const salt = user.email + '$';
+
         // Verifica se a senha atual fornecida é válida
         const isPasswordValid = await bcrypt.compare(
-            updatePasswordDto.currentPassword,
+            salt + updatePasswordDto.currentPassword,
             user.passwordHash,
         );
         if (!isPasswordValid) {
             throw new BadRequestException('Senha atual incorreta');
         }
-
-        const salt = user.email + '$';
 
         // Faz o hash da nova senha antes de salvar
         const hashedPassword = await bcrypt.hash(
@@ -116,15 +114,16 @@ export class UsersService {
         return user.save();
     }
 
+    // Não é necessário DTO para deletar
     async removeFavoriteRecipe(
         userId: string,
-        deleteFavoritesDto: DeleteFavoritesDto,
+        recipeId: string,
     ): Promise<User> {
         const updatedUser = await this.userModel.findByIdAndUpdate(
             userId,
             {
                 $pull: {
-                    favoriteRecipes: { recipeId: deleteFavoritesDto.id },
+                    favoriteRecipes: { recipeId },
                 },
             },
             { new: true }, // retorna o documento atualizado
@@ -136,12 +135,11 @@ export class UsersService {
 
         // Verifica se realmente havia esse favorito
         const stillExists = updatedUser.favoriteRecipes.some(
-            (fav) => fav.recipeId === deleteFavoritesDto.id,
+            (fav) => fav.recipeId === recipeId,
         );
         if (stillExists) {
             throw new BadRequestException('Falha ao remover favorito');
         }
-
         return updatedUser;
     }
 
@@ -170,34 +168,50 @@ export class UsersService {
 
     async addReview(
         userId: string,
+        recipeId: string,
         createReviewDto: CreateReviewDto,
-        updateReviewDto: UpdateReviewDto,
     ): Promise<{ user: User; recipe: Recipe }> {
         const user = await this.userModel.findById(userId);
         if (!user) {
             throw new NotFoundException('Usuário não encontrado');
         }
 
-        const recipe = await this.recipeModel.findById(createReviewDto.id);
+        let recipe = await this.recipeModel.findById({ recipeId });
+
         if (!recipe) {
-            throw new NotFoundException('Receita não encontrada');
+            recipe = new this.recipeModel({
+                recipeId,
+                title: createReviewDto.title ?? 'Receita sem título',
+                reviews: [],
+            });
         }
 
         const existingReview = user.reviewRecipes.find(
-            (review) => review.recipeId === createReviewDto.id,
+            (review) => review.recipeId === recipeId,
         );
+
+        if (
+            !existingReview &&
+            (createReviewDto.grade === null ||
+                createReviewDto.grade === undefined)
+        ) {
+            throw new BadRequestException(
+                'A nota é obrigatória para criar um review',
+            );
+        }
+
+        const finalGrade = createReviewDto.grade ?? existingReview?.grade;
+        if (finalGrade === undefined || finalGrade === null) {
+            throw new BadRequestException('Nota inválida');
+        }
 
         const reviewData = {
             userId,
-            recipeId: createReviewDto.id,
-            title: createReviewDto.title,
+            recipeId,
+            title: createReviewDto.title ?? existingReview?.title ?? '',
             date: new Date(),
-            comment: existingReview
-                ? (updateReviewDto.comment ?? existingReview.comment)
-                : createReviewDto.comment,
-            grade: existingReview
-                ? (updateReviewDto.grade ?? existingReview.grade)
-                : createReviewDto.grade,
+            comment: createReviewDto.comment ?? existingReview?.comment ?? '',
+            grade: finalGrade,
         };
 
         // Atualiza ou adiciona review no usuário
@@ -227,16 +241,21 @@ export class UsersService {
 
     async listFavoriteRecipes(
         userId: string,
+        limit: number,
+        offset: number,
     ): Promise<{ recipeId: string; title: string }[]> {
         const user = await this.userModel.findById(userId);
-
         if (!user) {
             throw new NotFoundException('Usuário não encontrado');
         }
-        return user.favoriteRecipes.slice(0, 10); //corrigir  futuramente para fazer paginação
+        return user.favoriteRecipes.slice(offset, offset + limit);
     }
 
-    async listUserReviews(userId: string): Promise<User['reviewRecipes']> {
+    async listUserReviews(
+        userId: string,
+        limit: number,
+        offset: number,
+    ): Promise<User['reviewRecipes']> {
         const user = await this.userModel.findById(userId);
 
         if (!user) {
@@ -248,11 +267,13 @@ export class UsersService {
             (a, b) => b.date.getTime() - a.date.getTime(),
         );
 
-        return orderedReviews.slice(0, 10); //corrigir  futuramente para fazer paginação
+        return orderedReviews.slice(offset, offset + limit);
     }
 
     async listRecipeReviews(
         recipeId: string,
+        limit: number,
+        offset: number,
     ): Promise<{ date: Date; comment: string; grade: number }[]> {
         const recipe = await this.recipeModel.findById(recipeId);
 
@@ -261,12 +282,10 @@ export class UsersService {
         }
 
         // Retorna apenas os reviews com as propriedades solicitadas
-        return recipe.reviews
-            .map((review) => ({
-                date: review.date,
-                comment: review.comment ?? '', // Talvez seria mais performático inicializar o comentário como string vazia e pular esse map
-                grade: review.grade,
-            }))
-            .slice(0, 10);
+        return recipe.reviews.slice(offset, offset + limit).map((review) => ({
+            date: review.date,
+            comment: review.comment ?? '',
+            grade: review.grade,
+        }));
     }
 }

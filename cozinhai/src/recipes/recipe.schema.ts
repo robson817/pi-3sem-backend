@@ -5,6 +5,12 @@ export type RecipeDocument = HydratedDocument<Recipe>;
 
 @Schema()
 export class Recipe {
+    @Prop({ required: true, unique: true })
+    recipeId!: string;
+
+    @Prop()
+    title?: string;
+
     @Prop({
         type: [
             {

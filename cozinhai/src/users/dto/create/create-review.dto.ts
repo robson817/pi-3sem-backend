@@ -10,11 +10,8 @@ import {
 } from 'class-validator';
 
 export class CreateReviewDto {
-    @IsString({ message: 'ID da receita deve ser uma string' })
-    @IsNotEmpty({ message: 'ID da receita é obrigatório' })
-    id!: string;
-
     @IsString({ message: 'O titulo da receita deve ser uma string' })
+    @IsNotEmpty({ message: 'O título da receita é obrigatório' })
     title!: string;
 
     @IsNotEmpty({ message: 'Nota da receita não pode ser vazia' })
