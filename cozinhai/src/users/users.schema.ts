@@ -26,6 +26,7 @@ export class User {
             {
                 recipeId: String,
                 title: String,
+                recipeImage: String,
             },
         ],
         default: [],
@@ -33,6 +34,7 @@ export class User {
     favoriteRecipes!: {
         recipeId: string;
         title: string;
+        recipeImage: string;
     }[];
 
     @Prop({
@@ -40,6 +42,7 @@ export class User {
             {
                 recipeId: String,
                 title: String,
+                recipeImage: String,
                 date: Date,
                 comment: String,
                 grade: {
@@ -54,6 +57,7 @@ export class User {
     reviewRecipes!: {
         recipeId: string;
         title: string;
+        recipeImage: string;
         date: Date;
         comment?: string;
         grade: number;

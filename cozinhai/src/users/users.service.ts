@@ -110,6 +110,7 @@ export class UsersService {
         user.favoriteRecipes.unshift({
             recipeId: createFavoritesDto.id,
             title: createFavoritesDto.title,
+            recipeImage: createFavoritesDto.recipeImage ?? '',
         });
         return user.save();
     }
@@ -213,9 +214,10 @@ export class UsersService {
         const reviewData = {
             userId,
             recipeId,
-            title: createReviewDto.title ?? existingReview?.title ?? '',
+            title: createReviewDto.title ?? '',
+            recipeImage: createReviewDto.recipeImage ?? '',
             date: new Date(),
-            comment: createReviewDto.comment ?? existingReview?.comment ?? '',
+            comment: createReviewDto.comment ?? '',
             grade: finalGrade,
         };
 

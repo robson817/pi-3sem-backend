@@ -9,6 +9,7 @@ import {
     Max,
     IsOptional,
     IsDate,
+    IsUrl,
 } from 'class-validator';
 
 export class CreateReviewDto {
@@ -24,6 +25,10 @@ export class CreateReviewDto {
     @IsString({ message: 'ID da receita deve ser uma string' })
     @IsNotEmpty({ message: 'ID da receita é obrigatório' })
     recipeId!: string;
+
+    @IsOptional()
+    @IsUrl({}, { message: 'A imagem da receita deve ser uma URL válida' })
+    recipeImage?: string;
 
     @IsOptional()
     @IsInt({ message: 'Nota deve ser um número inteiro' })
