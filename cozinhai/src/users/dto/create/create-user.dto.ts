@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import {
     IsNotEmpty,
     IsEmail,
@@ -12,11 +13,13 @@ export class CreateUserDto {
     @IsNotEmpty({ message: 'Nome não pode ser vazio' })
     @MinLength(3, { message: 'Nome deve conter no mínimo três caracteres' })
     @MaxLength(30, { message: 'Nome deve conter no máximo trinta caracteres' })
+    @ApiProperty({ description: 'Nome do usuário', required: true })
     name!: string;
 
     @IsString({ message: 'Email deve ser uma string' })
     @IsEmail({}, { message: 'Email inválido' })
     @IsNotEmpty({ message: 'Email não pode ser vazio' })
+    @ApiProperty({ description: 'Email do usuário', required: true })
     email!: string;
 
     @IsString({ message: 'Senha deve ser uma string' })
@@ -32,5 +35,6 @@ export class CreateUserDto {
     @Matches(/(?=.*[!@#$%^&*])/, {
         message: 'Senha deve conter ao menos um caractere especial',
     })
+    @ApiProperty({ description: 'Senha do usuário', required: true })
     password!: string;
 }

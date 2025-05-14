@@ -23,6 +23,10 @@ export class UsersService {
         private recipeModel: Model<RecipeDocument>,
     ) {}
 
+    async findOneByEmail(email: string): Promise<UserDocument | null> {
+        return this.userModel.findOne({ email }).exec();
+    }
+
     async createUser(createUserDto: CreateUserDto): Promise<User> {
         //Verifica se o email já existe no banco
         const existingEmail = await this.userModel.findOne({
