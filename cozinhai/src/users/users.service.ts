@@ -58,11 +58,13 @@ export class UsersService {
         userId: string,
         updateNameDto: UpdateNameDto,
     ): Promise<User> {
-        const user = await this.userModel.findByIdAndUpdate(
-            userId,
-            { name: updateNameDto.name },
-            { new: true }, //retorna o novo nome no post do thunder client
-        );
+        const user = await this.userModel
+            .findByIdAndUpdate(
+                userId,
+                { name: updateNameDto.name },
+                { new: true }, //retorna o novo nome no post do thunder client
+            )
+            .select('name');
 
         if (!user) throw new NotFoundException('Usuário não encontrado');
         return user;

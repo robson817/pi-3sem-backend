@@ -12,8 +12,8 @@ interface SafeUser {
 @Injectable()
 export class AuthService {
     constructor(
-        private readonly userService: UsersService,
-        private readonly jwtService: JwtService,
+        private userService: UsersService,
+        private jwtService: JwtService,
     ) {}
 
     async validateUser(

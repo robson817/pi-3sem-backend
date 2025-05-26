@@ -18,7 +18,6 @@ import { User } from './users.schema';
 import { UpdatePasswordDto } from './dto/update/update-password.dto';
 import { CreateFavoritesDto } from './dto/create/create-favorites.dto';
 import { CreateReviewDto } from './dto/create/create-review.dto';
-import { Recipe } from 'src/recipes/recipe.schema';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { ApiOperation, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 
@@ -36,7 +35,7 @@ export class UsersController {
             JSON.stringify(user),
         ) as Partial<User>;
         delete userObj.passwordHash;
-        return userObj;
+        return 'Usuário criado com sucesso';
     }
 
     @Patch(':id/name')
@@ -45,8 +44,9 @@ export class UsersController {
     async updateName(
         @Param('id') id: string,
         @Body() updateNameDto: UpdateNameDto,
-    ): Promise<User> {
-        return await this.UsersService.updateName(id, updateNameDto);
+    ): Promise<any> {
+        await this.UsersService.updateName(id, updateNameDto);
+        return { message: 'Nome atualizado com sucesso' };
     }
 
     @Patch(':id/password')
@@ -55,8 +55,9 @@ export class UsersController {
     async updatePassword(
         @Param('id') id: string,
         @Body() updatePasswordDto: UpdatePasswordDto,
-    ): Promise<User> {
-        return await this.UsersService.updatePassword(id, updatePasswordDto);
+    ): Promise<{ message: string }> {
+        await this.UsersService.updatePassword(id, updatePasswordDto);
+        return { message: 'Senha atualizada com sucesso' };
     }
 
     @Patch(':id/favorites')
@@ -65,11 +66,11 @@ export class UsersController {
     async addFavoriteRecipe(
         @Param('id') id: string,
         @Body() createFavoritesDto: CreateFavoritesDto,
-    ): Promise<User> {
-        return await this.UsersService.addFavoriteRecipe(
-            id,
-            createFavoritesDto,
-        );
+    ): Promise<{ message: string }> {
+        await this.UsersService.addFavoriteRecipe(id, createFavoritesDto);
+        return {
+            message: 'Receita adicionada ao livro de receitas com sucesso',
+        };
     }
 
     @Delete(':id/favorites/:recipeId')
@@ -78,8 +79,9 @@ export class UsersController {
     async removeFavoriteRecipe(
         @Param('id') id: string,
         @Param('recipeId') recipeId: string,
-    ): Promise<User> {
-        return await this.UsersService.removeFavoriteRecipe(id, recipeId);
+    ): Promise<{ message: string }> {
+        await this.UsersService.removeFavoriteRecipe(id, recipeId);
+        return { message: 'Receita apagada do livro de receita com sucesso' };
     }
 
     @Post('/:userId/:recipeId/reviews')
@@ -92,12 +94,9 @@ export class UsersController {
         @Param('userId') userId: string,
         @Param('recipeId') recipeId: string,
         @Body() createReviewDto: CreateReviewDto,
-    ): Promise<{ user: User; recipe: Recipe }> {
-        return await this.UsersService.addReview(
-            userId,
-            recipeId,
-            createReviewDto,
-        );
+    ): Promise<{ message: string }> {
+        await this.UsersService.addReview(userId, recipeId, createReviewDto);
+        return { message: 'Avaliação adicionada/atualizada com sucesso' };
     }
 
     @Get('/:id/favorites')

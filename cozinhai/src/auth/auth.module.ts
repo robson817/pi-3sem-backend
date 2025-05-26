@@ -3,28 +3,19 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { UsersModule } from 'src/users/users.module';
 import { JwtModule } from '@nestjs/jwt';
-import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthGuard } from './auth.guard';
 
 @Module({
     imports: [
-        ConfigModule.forRoot({
-            isGlobal: true, // torna disponível em toda a aplicação
-        }),
         UsersModule,
-        JwtModule.registerAsync({
-            imports: [ConfigModule],
-            inject: [ConfigService],
-            useFactory: (configService: ConfigService) => ({
-                secret: configService.get<string>('JWT_SECRET'),
-                signOptions: {
-                    expiresIn: configService.get<string>('JWT_EXPIRES_IN'),
-                },
-            }),
+        JwtModule.register({
+            global: true,
+            secret: process.env.JWT_SECRET || '1234',
+            signOptions: { expiresIn: process.env.JWT_EXPIRES_IN || '7d' },
         }),
     ],
-    providers: [AuthService, AuthGuard],
     controllers: [AuthController],
+    providers: [AuthService, AuthGuard],
     exports: [AuthGuard],
 })
 export class AuthModule {}
