@@ -19,16 +19,12 @@ import { UpdatePasswordDto } from './dto/update/update-password.dto';
 import { CreateFavoritesDto } from './dto/create/create-favorites.dto';
 import { CreateReviewDto } from './dto/create/create-review.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
-import { ApiOperation, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 
-@ApiTags('Usuário')
-@ApiBearerAuth() // <-- Adicionado para exibir o botão "Authorize" no Swagger
 @Controller('user')
 export class UsersController {
     constructor(private readonly UsersService: UsersService) {}
 
     @Post()
-    @ApiOperation({ summary: 'Cria um novo usuário' })
     async createUser(@Body() createUserDto: CreateUserDto): Promise<any> {
         const user = await this.UsersService.createUser(createUserDto);
         const userObj: Partial<User> = JSON.parse(
@@ -40,7 +36,6 @@ export class UsersController {
 
     @Patch(':id/name')
     @UseGuards(AuthGuard)
-    @ApiOperation({ summary: 'Atualiza o nome do usuário' })
     async updateName(
         @Param('id') id: string,
         @Body() updateNameDto: UpdateNameDto,
@@ -51,7 +46,6 @@ export class UsersController {
 
     @Patch(':id/password')
     @UseGuards(AuthGuard)
-    @ApiOperation({ summary: 'Atualiza a senha do usuário' })
     async updatePassword(
         @Param('id') id: string,
         @Body() updatePasswordDto: UpdatePasswordDto,
@@ -62,7 +56,6 @@ export class UsersController {
 
     @Patch(':id/favorites')
     @UseGuards(AuthGuard)
-    @ApiOperation({ summary: 'Adiciona uma receita aos favoritos do usuário' })
     async addFavoriteRecipe(
         @Param('id') id: string,
         @Body() createFavoritesDto: CreateFavoritesDto,
@@ -75,7 +68,6 @@ export class UsersController {
 
     @Delete(':id/favorites/:recipeId')
     @UseGuards(AuthGuard)
-    @ApiOperation({ summary: 'Remove uma receita dos favoritos do usuário' })
     async removeFavoriteRecipe(
         @Param('id') id: string,
         @Param('recipeId') recipeId: string,
@@ -86,10 +78,6 @@ export class UsersController {
 
     @Post('/:userId/:recipeId/reviews')
     @UseGuards(AuthGuard)
-    @ApiOperation({
-        summary:
-            'Adiciona ou atualiza uma avaliação do usuário sobre a receita',
-    })
     async addReview(
         @Param('userId') userId: string,
         @Param('recipeId') recipeId: string,
@@ -101,7 +89,6 @@ export class UsersController {
 
     @Get('/:id/favorites')
     @UseGuards(AuthGuard)
-    @ApiOperation({ summary: 'Lista os favoritos do usuário' })
     async listFavoriteRecipes(
         @Param('id') id: string,
         @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
@@ -112,9 +99,6 @@ export class UsersController {
 
     @Get('/:id/reviews')
     @UseGuards(AuthGuard)
-    @ApiOperation({
-        summary: 'Lista as avaliações dos usuários sobre a receita',
-    })
     async listUserReviews(
         @Param('id') id: string,
         @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
