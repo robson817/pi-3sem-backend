@@ -29,6 +29,9 @@ export class CreateUserDto {
     @Matches(/(?=.*[A-Z])/, {
         message: 'Senha deve conter ao menos uma letra maiúscula',
     })
+    @Matches(/(?=.*[a-z])/, {
+        message: 'Senha deve conter ao menos uma letra minúscula',
+    })
     @Matches(/(?=.*\d)/, {
         message: 'Senha deve conter ao menos um número',
     })
