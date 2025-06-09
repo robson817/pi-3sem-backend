@@ -11,7 +11,7 @@ async function bootstrap() {
 
     // Configuração do CORS, permitindo origem específica para maior segurança
     app.enableCors({
-        origin: process.env.CORS_ORIGIN || 'http://localhost:3000', // Permitir CORS apenas para domínios específicos
+        origin: process.env.CORS_ORIGIN || '0.0.0.0',
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
         allowedHeaders: 'Content-Type, Authorization',
     });
