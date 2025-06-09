@@ -1,4 +1,3 @@
-import { ApiProperty } from '@nestjs/swagger';
 import {
     IsString,
     IsNotEmpty,
@@ -23,11 +22,9 @@ export class UpdatePasswordDto {
     @Matches(/(?=.*[!@#$%^&*])/, {
         message: 'Senha nova deve conter ao menos um caractere especial',
     })
-    @ApiProperty({ description: 'Nova senha do usuário', required: true })
     newPassword!: string;
 
     @IsString({ message: 'Senha atual deve ser uma string' })
     @IsNotEmpty({ message: 'Senha atual não pode ser vazia' })
-    @ApiProperty({ description: 'Atual senha do usuário', required: true })
     currentPassword!: string;
 }
