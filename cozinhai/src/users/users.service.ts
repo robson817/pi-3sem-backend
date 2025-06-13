@@ -283,4 +283,16 @@ export class UsersService {
 
         return orderedReviews.slice(offset, offset + limit);
     }
+
+    async deactivateUser(userId: string): Promise<User> {
+        const user = await this.userModel.findById(userId);
+        if (!user) {
+            throw new NotFoundException('Usuário não encontrado');
+        }
+
+        user.status = false;
+        await user.save();
+
+        return user;
+    }
 }

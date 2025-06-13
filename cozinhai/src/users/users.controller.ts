@@ -106,4 +106,11 @@ export class UsersController {
     ): Promise<{ recipeId: string; title: string }[]> {
         return await this.UsersService.listUserReviews(id, limit, offset);
     }
+
+    @Patch(':id/deactivate')
+    @UseGuards(AuthGuard)
+    async deactivate(@Param('id') id: string): Promise<{ message: string }> {
+        await this.UsersService.deactivateUser(id);
+        return { message: 'Usuário desativado com sucesso' };
+    }
 }
