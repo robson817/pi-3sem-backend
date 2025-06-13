@@ -1,16 +1,16 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { RecipesService } from './recipes.service';
 import { RecipesController } from './recipes.controller';
 import { Recipe, RecipesSchema } from './recipe.schema';
-import { UsersModule } from 'src/users/users.module';
+import { UsersModule } from '../users/users.module';
 
 @Module({
     imports: [
         MongooseModule.forFeature([
             { name: Recipe.name, schema: RecipesSchema },
         ]),
-        UsersModule,
+        forwardRef(() => UsersModule), // 👈 aqui
     ],
     controllers: [RecipesController],
     providers: [RecipesService],
