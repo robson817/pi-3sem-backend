@@ -47,7 +47,7 @@ export class AuthService {
             id: userWithoutPassword._id,
             email: userWithoutPassword.email,
             name: userWithoutPassword.name,
-            status: userWithoutPassword.status, // agora incluímos status
+            status: userWithoutPassword.status,
         };
 
         return safeUser;
@@ -62,7 +62,7 @@ export class AuthService {
                 id: user.id,
                 email: user.email,
                 name: user.name,
-                status: user.status, // inclua status se necessário no front
+                status: user.status,
             },
         };
     }

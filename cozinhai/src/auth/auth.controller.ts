@@ -5,6 +5,7 @@ import {
     Logger,
     HttpStatus,
     Res,
+    UnauthorizedException,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
@@ -48,6 +49,13 @@ export class AuthController {
                 message: 'Usuário ou senha inválidos',
             });
         } catch (error) {
+            if (error instanceof UnauthorizedException) {
+                this.logger.warn(`Login recusado: ${error.message}`);
+                return res.status(HttpStatus.UNAUTHORIZED).json({
+                    message: error.message,
+                });
+            }
+
             if (error instanceof Error) {
                 this.logger.error(
                     `Erro no login: ${error.message}`,
@@ -56,6 +64,7 @@ export class AuthController {
             } else {
                 this.logger.error('Erro no login: erro desconhecido');
             }
+
             return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
                 message: 'Erro interno no servidor',
             });
