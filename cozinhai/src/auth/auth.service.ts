@@ -41,6 +41,7 @@ export class AuthService {
         const safeUser: SafeUser = {
             id: userWithoutPassword._id,
             email: userWithoutPassword.email,
+            name: userWithoutPassword.name,
         };
 
         return safeUser;

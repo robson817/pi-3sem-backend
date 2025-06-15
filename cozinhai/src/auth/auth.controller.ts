@@ -34,7 +34,14 @@ export class AuthController {
             if (user) {
                 this.logger.debug('Login bem sucedido');
                 const token = this.authService.login(user);
-                return res.status(HttpStatus.CREATED).json(token);
+                return res.status(HttpStatus.OK).json({
+                    access_token: token,
+                    user: {
+                        id: user.id,
+                        name: user.name,
+                        email: user.email,
+                    },
+                });
             }
 
             return res.status(HttpStatus.UNAUTHORIZED).json({
