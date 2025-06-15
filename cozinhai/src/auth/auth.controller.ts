@@ -1,6 +1,14 @@
-import { Body, Controller, Post, Logger } from '@nestjs/common';
+import {
+    Body,
+    Controller,
+    Post,
+    Logger,
+    HttpStatus,
+    Res,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
+import { Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
@@ -9,9 +17,11 @@ export class AuthController {
     constructor(private readonly authService: AuthService) {}
 
     @Post('login')
-    async login(@Body() body: LoginDto) {
+    async login(@Body() body: LoginDto, @Res() res: Response) {
         if (!body.email || !body.password) {
-            return { message: 'Informe email e senha para efetuar o login' };
+            return res.status(HttpStatus.BAD_REQUEST).json({
+                message: 'Informe email e senha para efetuar o login',
+            });
         }
 
         try {
@@ -20,12 +30,16 @@ export class AuthController {
                 body.email,
                 body.password,
             );
+
             if (user) {
                 this.logger.debug('Login bem sucedido');
-                return this.authService.login(user);
+                const token = this.authService.login(user);
+                return res.status(HttpStatus.CREATED).json(token);
             }
 
-            return { message: 'Usuário ou senha inválidos' };
+            return res.status(HttpStatus.UNAUTHORIZED).json({
+                message: 'Usuário ou senha inválidos',
+            });
         } catch (error) {
             if (error instanceof Error) {
                 this.logger.error(
@@ -35,7 +49,9 @@ export class AuthController {
             } else {
                 this.logger.error('Erro no login: erro desconhecido');
             }
-            throw error;
+            return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+                message: 'Erro interno no servidor',
+            });
         }
     }
 }
