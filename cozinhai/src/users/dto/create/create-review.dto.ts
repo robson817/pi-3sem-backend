@@ -1,6 +1,5 @@
 import { Type } from 'class-transformer';
 import {
-    IsNotEmpty,
     IsString,
     MinLength,
     MaxLength,
@@ -22,10 +21,6 @@ export class CreateReviewDto {
     @MinLength(3, { message: 'Título deve ter no mínimo 3 caracteres' })
     @MaxLength(100, { message: 'Título deve ter no máximo 100 caracteres' })
     title?: string;
-
-    @IsString({ message: 'ID da receita deve ser uma string' })
-    @IsNotEmpty({ message: 'ID da receita é obrigatório' })
-    recipeId!: string;
 
     @IsOptional()
     @IsUrl({}, { message: 'A imagem da receita deve ser uma URL válida' })
