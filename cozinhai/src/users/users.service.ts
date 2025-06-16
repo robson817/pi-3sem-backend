@@ -257,12 +257,19 @@ export class UsersService {
         userId: string,
         limit: number,
         offset: number,
-    ): Promise<{ recipeId: string; title: string }[]> {
+    ): Promise<{ recipeId: string; title: string; recipeImage: string }[]> {
         const user = await this.userModel.findById(userId);
         if (!user) {
             throw new NotFoundException('Usuário não encontrado');
         }
-        return user.favoriteRecipes.slice(offset, offset + limit);
+
+        return user.favoriteRecipes
+            .slice(offset, offset + limit)
+            .map((fav) => ({
+                recipeId: fav.recipeId,
+                title: fav.title,
+                recipeImage: fav.recipeImage, // agora incluído no retorno
+            }));
     }
 
     async listUserReviews(
