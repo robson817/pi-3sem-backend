@@ -230,7 +230,15 @@ export class UsersService {
         // Atualiza ou adiciona review no usuário
         if (existingReview) {
             user.reviewRecipes = user.reviewRecipes.map((review) =>
-                review.recipeId === recipeId ? reviewData : review,
+                review.recipeId === recipeId
+                    ? {
+                          ...review,
+                          ...reviewData,
+                          title: createReviewDto.title ?? review.title,
+                          recipeImage:
+                              createReviewDto.recipeImage ?? review.recipeImage,
+                      }
+                    : review,
             );
         } else {
             user.reviewRecipes.push(reviewData);
