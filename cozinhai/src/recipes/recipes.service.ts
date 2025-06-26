@@ -35,6 +35,7 @@ export class RecipesService {
                     date: review.date,
                     comment: review.comment ?? '',
                     grade: review.grade,
+                    userId: review.userId,
                 });
             }
         }
