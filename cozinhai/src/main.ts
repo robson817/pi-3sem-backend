@@ -9,19 +9,17 @@ import {
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
 
-    // Configuração do CORS, permitindo origem específica para maior segurança
     app.enableCors({
         origin: process.env.CORS_ORIGIN || '0.0.0.0',
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
         allowedHeaders: 'Content-Type, Authorization',
     });
 
-    // Validação de entrada global com customização de erro
     app.useGlobalPipes(
         new ValidationPipe({
-            transform: true, // Transforma os dados de entrada no tipo correto
-            whitelist: true, // Remove campos que não estão no DTO
-            forbidNonWhitelisted: true, // Retorna erro se houver campos extras
+            transform: true,
+            whitelist: true,
+            forbidNonWhitelisted: true,
             exceptionFactory: (validationErrors: ValidationError[]) => {
                 const errors: Record<string, string[]> = {};
                 validationErrors.forEach((error) => {

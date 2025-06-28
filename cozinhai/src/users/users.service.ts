@@ -18,7 +18,7 @@ import { CreateReviewDto } from './dto/create/create-review.dto';
 export class UsersService {
     constructor(
         @InjectModel(User.name)
-        private userModel: Model<UserDocument>, // Pode ser usado 'User' no lugar do User.name
+        private userModel: Model<UserDocument>,
         @InjectModel(Recipe.name)
         private recipeModel: Model<RecipeDocument>,
     ) {}
@@ -28,7 +28,6 @@ export class UsersService {
     }
 
     async createUser(createUserDto: CreateUserDto): Promise<User> {
-        //Verifica se o email já existe no banco
         const existingEmail = await this.userModel.findOne({
             email: createUserDto.email,
         });
@@ -36,16 +35,8 @@ export class UsersService {
             throw new BadRequestException('Email já está em uso');
         }
         const salt = createUserDto.email + '$';
-        // Cria a variável password e a userData será todo o Dto, menos o password
         const { password, ...userData } = createUserDto;
-        // Hash da senha
         const hashedPassword: string = await bcrypt.hash(salt + password, 10);
-
-        //Poderia ser feito assim
-        // const name = createUserDto.name;
-        // const email = createUserDto.email;
-
-        // Cria usuário com a senha já criptografada
         const createdUser = new this.userModel({
             ...userData,
             passwordHash: hashedPassword,
@@ -62,7 +53,7 @@ export class UsersService {
             .findByIdAndUpdate(
                 userId,
                 { name: updateNameDto.name },
-                { new: true }, //retorna o novo nome no post do thunder client
+                { new: true },
             )
             .select('name');
 
@@ -76,10 +67,7 @@ export class UsersService {
     ): Promise<User> {
         const user = await this.userModel.findById(userId);
         if (!user) throw new NotFoundException('Usuário não encontrado');
-
         const salt = user.email + '$';
-
-        // Verifica se a senha atual fornecida é válida
         const isPasswordValid = await bcrypt.compare(
             salt + updatePasswordDto.currentPassword,
             user.passwordHash,
@@ -87,8 +75,6 @@ export class UsersService {
         if (!isPasswordValid) {
             throw new BadRequestException('Senha atual incorreta');
         }
-
-        // Faz o hash da nova senha antes de salvar
         const hashedPassword = await bcrypt.hash(
             salt + updatePasswordDto.newPassword,
             10,
@@ -121,7 +107,6 @@ export class UsersService {
         return user.save();
     }
 
-    // Não é necessário DTO para deletar
     async removeFavoriteRecipe(
         userId: string,
         recipeId: string,
@@ -133,14 +118,12 @@ export class UsersService {
                     favoriteRecipes: { recipeId },
                 },
             },
-            { new: true }, // retorna o documento atualizado
+            { new: true },
         );
 
         if (!updatedUser) {
             throw new NotFoundException('Usuário não encontrado');
         }
-
-        // Verifica se realmente havia esse favorito
         const stillExists = updatedUser.favoriteRecipes.some(
             (fav) => fav.recipeId === recipeId,
         );
@@ -149,29 +132,6 @@ export class UsersService {
         }
         return updatedUser;
     }
-
-    // async removeFavoriteRecipe(
-    //     userId: string,
-    //     deleteFavoritesDto: DeleteFavoritesDto,
-    // ): Promise<User> {
-    //     const user = await this.userModel.findById(userId);
-    //     if (!user) {
-    //         throw new NotFoundException('Usuário não encontrado');
-    //     }
-
-    //     const alreadyFavoriteRecipe = user.favoriteRecipes.some(
-    //         (fav) => fav.recipeId === deleteFavoritesDto.id,
-    //     );
-
-    //     if (!alreadyFavoriteRecipe) {
-    //         throw new BadRequestException('Receita não está nos favoritos');
-    //     }
-
-    //     user.favoriteRecipes = user.favoriteRecipes.filter(
-    //         (fav) => fav.recipeId !== deleteFavoritesDto.id,
-    //     );
-    //     return user.save();
-    // }
 
     async addReview(
         userId: string,
@@ -182,8 +142,6 @@ export class UsersService {
         if (!user) {
             throw new NotFoundException('Usuário não encontrado');
         }
-
-        // Validação do ID da receita
         if (!recipeId.trim()) {
             throw new BadRequestException('ID da receita inválido');
         }
@@ -227,7 +185,6 @@ export class UsersService {
             grade: finalGrade,
         };
 
-        // Atualiza ou adiciona review no usuário
         if (existingReview) {
             user.reviewRecipes = user.reviewRecipes.map((review) =>
                 review.recipeId === recipeId
@@ -244,7 +201,6 @@ export class UsersService {
             user.reviewRecipes.push(reviewData);
         }
 
-        // Atualiza ou adiciona review na receita
         const reviewIndex = recipe.reviews.findIndex(
             (review) => review.userId === userId,
         );
@@ -276,7 +232,7 @@ export class UsersService {
             .map((fav) => ({
                 recipeId: fav.recipeId,
                 title: fav.title,
-                recipeImage: fav.recipeImage, // agora incluído no retorno
+                recipeImage: fav.recipeImage,
             }));
     }
 
@@ -291,7 +247,6 @@ export class UsersService {
             throw new NotFoundException('Usuário não encontrado');
         }
 
-        // Ordena por data (mais recente primeiro)
         const orderedReviews = user.reviewRecipes.sort(
             (a, b) => b.date.getTime() - a.date.getTime(),
         );
